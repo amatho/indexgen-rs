@@ -1,0 +1,8 @@
+[package]
+name = "indexgen"
+version = "0.1.0"
+authors = ["Amandus Thorsrud <ama.thorsrud@gmail.com>"]
+
+[dependencies]
+handlebars = "0.32.1"
+serde_json = "1.0.17"

@@ -1,4 +1,4 @@
-const template: &str = #"
+pub const TEMPLATE: &str = r#"
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,12 +42,12 @@ const template: &str = #"
 			</tr>
 		</thead>
 		<tbody>
-			{{#each file}}
+			{{#each files}}
 			<tr>
 				<td>
-					<a href="{{this.name}}">{{this.name}}</a>
+					<a href="{{this.file_name}}">{{this.file_name}}</a>
 				</td>
-				<td class="filetype">{{this.type}}</td>
+				<td class="filetype">{{this.file_type}}</td>
 			</tr>
 			{{/each}}
 		</tbody>

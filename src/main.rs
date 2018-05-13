@@ -25,7 +25,7 @@ struct Data {
 fn main() {
   let args: Vec<_> = env::args().collect();
   let working_dir = get_wd(&args);
-  let current_dir: String = env::current_dir().unwrap().file_name().unwrap().to_str().unwrap().into();
+  let current_dir = get_current_dir(&working_dir);
 
   let paths = match fs::read_dir(&working_dir) {
     Ok(p) => p,
@@ -41,7 +41,7 @@ fn main() {
   for path in paths {
     let path = path.unwrap().path();
 
-    if is_hidden(&path) {
+    if should_ignore(&path) {
       continue;
     }
 
@@ -50,7 +50,7 @@ fn main() {
   }
 
   let data = Data { files: file_vec, dir: current_dir };
-  write_index(data);
+  write_index(data, working_dir);
 }
 
 fn get_wd(args: &Vec<String>) -> String {
@@ -61,6 +61,18 @@ fn get_wd(args: &Vec<String>) -> String {
   };
 
   String::from(wd)
+}
+
+fn get_current_dir(working_dir: &String) -> String {
+  let wd = working_dir.as_str();
+  let path_buf = match wd {
+    "." => {
+      env::current_dir().unwrap()
+    },
+    _ => path::Path::new(working_dir).to_path_buf()
+  };
+
+  path_buf.file_name().unwrap().to_str().unwrap().to_string()
 }
 
 fn build_file_data(path: path::PathBuf) -> FileData {
@@ -77,15 +89,16 @@ fn build_file_data(path: path::PathBuf) -> FileData {
   }
 }
 
-fn is_hidden(path: &path::PathBuf) -> bool {
+fn should_ignore(path: &path::PathBuf) -> bool {
   let file_name = String::from(path.file_name().unwrap().to_str().unwrap());
   let first_char = &file_name[0..1];
 
-  first_char == "."
+  first_char == "." || &file_name[..] == "index.html"
 }
 
-fn write_index(data: Data) {
+fn write_index(data: Data, working_dir: String) {
   let handlebars = handlebars::Handlebars::new();
   let temp = handlebars.render_template(template::TEMPLATE, &data).expect("Could not render template.");
-  fs::write("index.html", temp).expect("Could not write index.html.");
+  let write_path = path::Path::new(&working_dir).join("index.html");
+  fs::write(write_path, temp).expect("Could not write index.html.");
 }

@@ -1,23 +1,15 @@
-extern crate handlebars;
-#[macro_use]
-extern crate serde_derive;
-
-extern crate serde;
-
 mod template;
 
 use std::fs;
 use std::path;
 use std::env;
 
-#[derive(Serialize)]
 struct FileData {
   file_type: String,
   file_name: String,
 }
 
-#[derive(Serialize)]
-struct Data {
+pub struct Data {
   files: Vec<FileData>,
   dir: String,
 }
@@ -97,8 +89,7 @@ fn should_ignore(path: &path::PathBuf) -> bool {
 }
 
 fn write_index(data: Data, working_dir: String) {
-  let handlebars = handlebars::Handlebars::new();
-  let temp = handlebars.render_template(template::TEMPLATE, &data).expect("Could not render template.");
+  let contents = template::generate(data);
   let write_path = path::Path::new(&working_dir).join("index.html");
-  fs::write(write_path, temp).expect("Could not write index.html.");
+  fs::write(write_path, contents).expect("Could not write index.html.");
 }
